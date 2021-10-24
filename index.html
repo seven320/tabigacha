@@ -10,7 +10,6 @@
     <script type="text/javascript" src="./jmap.js"></script>
     <script type = "text/javascript">
         var prefecture_id = 0
-
         function loadmap(){
             $(document).ready(function() {
             $('#jmap').jmap({
@@ -24,6 +23,7 @@
             });
         });
         }
+
         loadmap();
     </script>
 </head>
@@ -34,6 +34,7 @@
 </body>
 
     <script>
+        var intervalID
         function getRandomint(max){
             return Math.floor(Math.random() * max)
         }
@@ -45,8 +46,21 @@
         }
 
         function buttonClick(){
-            setInterval(function(){showrandomloadmap();}, 100)
+            let time = 0;
+            // ガチャ開始でランダムに表示する
+            let time_delta = 100
+            for(var i=0; i<15; i++){
+                time += 100
+                setTimeout(showrandomloadmap, time);
+            }
+            // ガチャの最後の部分で速度を落としていく
+            for(var j=0; j < 10; j++){
+                time_delta += 50
+                time += time_delta
+                setTimeout(showrandomloadmap, time);
+            }
         }
+
         
         var button = document.getElementById("gacha")
         button.onclick = buttonClick;

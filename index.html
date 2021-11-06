@@ -8,61 +8,113 @@
     <title>Tabi gacha</title>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script type="text/javascript" src="./jmap.js"></script>
+    <script type="text/javascript" src="./prefecture.js"></script>
     <script type = "text/javascript">
         var prefecture_id = 0
-        function loadmap(){
+        function loadmap(code_id){
             $(document).ready(function() {
             $('#jmap').jmap({
                 width: "600px",
                 height: "450px",
                 prefectureBackgroundColor: 'gray',  
             areas: [
-                {code: prefecture_id, color: "black"
+                {code: code_id, color: "black"
             }
             ]
             });
         });
         }
-
-        loadmap();
+        loadmap(0);
     </script>
 </head>
 <body>
     <div id="jmap" class= "map"></div>
-
     <button type="button" id = "gacha">ガチャする</button>
+    <div id="result">結果</div>
+    <div>検索結果</div>
+
+
+
+
 </body>
 
-    <script>
-        var intervalID
-        function getRandomint(max){
-            return Math.floor(Math.random() * max)
+
+<script>
+    var timeoutids = []
+    function getRandomint(max){
+        return Math.floor(Math.random() * max)
+    }
+
+    function showPrefectureInfo(prefecture_id){
+        showPrefectureText(prefecture_id);
+        loadmap(prefecture_id)
+    }
+
+    function showPrefectureText(prefecture_id){
+        document.getElementById("result").innerText = String(prefectures[prefecture_id-1].name)
+    }
+
+    function buttonClick(){
+        while (timeoutids.length > 0){
+            clearTimeout(timeoutids.pop())
+        }
+        // ガチャ結果を決定
+        var prefecture_ids = []
+        for(var i=0; i<25; i++){
+            prefecture_ids.push(getRandomint(47)+1)
         }
 
-        function showrandomloadmap(){
-            prefecture_id = getRandomint(47)+1
-            console.log(prefecture_id)
-            loadmap()
+        let time = 0;
+        // ガチャ開始でランダムに表示する
+        let time_delta = 100
+        for(var i=0; i<15; i++){
+            time += 100
+            timeoutids.push(setTimeout(function(){
+                prefecture_id = prefecture_ids.pop()
+                showPrefectureInfo(prefecture_id);
+                showPrefectureText(prefecture_id);
+            }, time));
         }
-
-        function buttonClick(){
-            let time = 0;
-            // ガチャ開始でランダムに表示する
-            let time_delta = 100
-            for(var i=0; i<15; i++){
-                time += 100
-                setTimeout(showrandomloadmap, time);
-            }
-            // ガチャの最後の部分で速度を落としていく
-            for(var j=0; j < 10; j++){
-                time_delta += 50
-                time += time_delta
-                setTimeout(showrandomloadmap, time);
-            }
+        // ガチャの最後の部分で速度を落としていく
+        for(var i=0; i< 9; i++){
+            time_delta += 50
+            time += time_delta
+            timeoutids.push(setTimeout(function(){
+                prefecture_id = prefecture_ids.pop()
+                showPrefectureInfo(prefecture_id);
+                showPrefectureText(prefecture_id);
+            }, time));
         }
-
         
-        var button = document.getElementById("gacha")
-        button.onclick = buttonClick;
-    </script>
+        // 最終結果を表示
+        result_prefecture_id = prefecture_ids.pop()
+
+        timeoutids.push(setTimeout(function(){
+            showPrefectureInfo(result_prefecture_id)
+            showPrefectureText(result_prefecture_id) 
+        }   
+        , time));
+
+
+        // 点滅
+        for(var i=0; i<5; i++){
+            time += time_delta
+            if(i%2==0){
+                timeoutids.push(setTimeout(function(){
+                    showPrefectureInfo(result_prefecture_id)
+                }, time));
+            }
+            else{
+                timeoutids.push(setTimeout(function(){
+                    loadmap(0)
+                }, time));
+                timeoutids.push(setTimeout(function(){
+                    showPrefectureText(result_prefecture_id)
+                }, time));
+            }
+        }
+    }
+    var button = document.getElementById("gacha")
+    button.onclick = buttonClick;
+</script>
 </html>
